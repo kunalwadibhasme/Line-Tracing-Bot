@@ -1,0 +1,156 @@
+//5 Channel IR Sensor Connection//
+#define ir1 A0
+#define ir2 A1
+#define ir3 A2
+#define ir4 A3
+#define ir5 A4
+
+#define m1 3  //Right Motor MA1
+#define m2 5  //Right Motor MA2
+#define m3 6  //Left Motor MB1
+#define m4 9  //Left Motor MB2
+bool run= true;
+int s1, s2, s3, s4, s5;
+void setup() {
+  pinMode(ir1, INPUT);
+  pinMode(ir2, INPUT);
+  pinMode(ir3, INPUT);
+  pinMode(ir4, INPUT);
+  pinMode(ir5, INPUT);
+  pinMode(13, OUTPUT);
+}
+void detect()
+{
+  s1 = digitalRead(ir1);  //Left Most Sensor
+  s2 = digitalRead(ir2);  //Left Sensor
+  s3 = digitalRead(ir3);  //Middle Sensor
+  s4 = digitalRead(ir4);  //Right Sensor
+  s5 = digitalRead(ir5);  //Right Most Sensor
+}
+void turnReverse()
+{
+  analogWrite(m1, 72);
+  analogWrite(m2, 0);
+  analogWrite(m3, 72);
+  analogWrite(m4, 0);
+  //delay(3000);    //dry run
+}
+void goStraight()
+{
+  analogWrite(m1, 60);
+  analogWrite(m2, 0);
+  analogWrite(m3, 60);
+  analogWrite(m4, 0);
+}
+void slightlyRight()
+{
+  analogWrite(m1, 40);
+  analogWrite(m4, 40+32);
+}
+void slightlyLeft()
+{
+  analogWrite(m1, 40+32);
+  analogWrite(m4, 40);
+}
+void turnLeft90()
+{
+  analogWrite(m1, 0);
+  analogWrite(m4, 200);
+}
+void turnRight90()
+{
+  analogWrite(m1, 200);
+  analogWrite(m4, 0);
+}
+void botStop()
+{
+  analogWrite(m1, 0);
+  analogWrite(m4, 0);
+  digitalWrite(13, HIGH);
+  run= false;
+}
+void loop() {
+  if(run== true){
+  detect();
+  analogWrite(m2,0);
+  analogWrite(m3,0);
+  
+  //1 == white
+  //0 == black //and ir sensor glows for 0 i.e. black
+  
+  // if(s1== 0 && s2== 0 && s3== 1 && s4== 0 && s5== 0)
+  // {
+  //     goStraight();      
+  // }
+  
+  if(s1== 1 && s2== 1 && s3== 1 && s4== 1 && s5== 1)
+  {
+      analogWrite(m1, 50);
+      analogWrite(m4, 50);
+      delay(250);
+      detect();
+      if(s1== 1 && s5== 1 )
+        botStop();
+      else
+      {
+        analogWrite(m1, 0);
+        analogWrite(m4, 200);
+        delay(200);
+        
+      }
+      // if(s1== 1 && s2== 1 && s3== 1 && s4== 1 && s5== 1)
+      //   botStop();
+      // else if(s1== 0 && s2== 0 && s3== 0 && s4== 0 && s5== 0)   //direction array will be used to record it
+      //   turnLeft90();
+  }
+  else if(s1== 0 && (s2== 1 || s3== 1) && s4==0 && s5== 0)
+  {
+      slightlyRight();
+  }
+  else if(s1== 0 && s2== 0 && (s3== 1 || s4==1) && s5== 0)
+  {
+      slightlyLeft();
+  }
+  else if(s1 == 0 && s2 == 0 && s3== 0 && s4 == 0 && s5 == 0)
+  {
+      turnReverse();
+  }
+  // else if(s1== 1 && (s2== 1 ||s3==1) || s4==0 && s5==0)//just commented out
+  // {
+  //     // analogWrite(m1, 35);
+  //     // analogWrite(m4, 35);
+  //     turnLeft90();
+  // }
+  else if(s1== 1 && s2== 0 && s3== 1 && s4== 1 && s5== 0)//obtuse left
+  {
+    analogWrite(m1, 0);
+    analogWrite(m4, 200);
+    delay(600);
+  }
+  else if(s1== 1 && s2== 1 && s3== 0 && s4== 0 && s5== 0)
+  {
+    
+    turnLeft90();
+    
+  }
+  else if((s1==1 && s3==1) || s2==1 || (s4==1 && s5==0))
+  {
+    analogWrite(m1,0);
+    analogWrite(m4,240);  
+  }
+  else if(s1== 0 && s2== 0 && s3== 0 && s4== 1 && s5== 1)
+  {
+      // analogWrite(m1, 35);
+      // analogWrite(m4, 35);
+      // s3= digitalRead(ir3);
+      // if(s3== 0)
+        turnRight90();
+     //else
+       // goStraight();
+  }
+  }
+  else{
+    digitalWrite(13, HIGH);
+  }
+
+}
